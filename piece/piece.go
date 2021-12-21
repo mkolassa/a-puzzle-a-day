@@ -9,8 +9,37 @@ import (
 
 var pieces = []piece{
 	{
+		{0, 1, 1, 1},
+		{1, 1, 0, 0},
+	},
+	{
+		{1, 1, 1},
+		{1, 0, 1},
+	},
+	{
+		{1, 1, 0},
+		{0, 1, 1},
+	},
+	{
+		{1, 0, 0},
+		{1, 1, 1},
+	},
+	{
 		{1, 0, 0, 0},
 		{1, 1, 1, 1},
+	},
+	{
+		{1, 1, 1, 1},
+	},
+	{
+		{1, 1, 1},
+		{0, 1, 0},
+		{0, 1, 0},
+	},
+	{
+		{1, 0, 0},
+		{1, 0, 0},
+		{1, 1, 1},
 	},
 	{
 		{1, 0, 0},
@@ -18,28 +47,7 @@ var pieces = []piece{
 		{0, 0, 1},
 	},
 	{
-		{0, 0, 1, 1},
-		{1, 1, 1, 0},
-	},
-	{
-		{1, 1, 1, 1},
-		{0, 0, 1, 0},
-	},
-	{
 		{0, 1, 1},
-		{1, 1, 1},
-	},
-	{
-		{1, 1, 1},
-		{1, 0, 1},
-	},
-	{
-		{1, 1, 1},
-		{1, 1, 1},
-	},
-	{
-		{1, 0, 0},
-		{1, 0, 0},
 		{1, 1, 1},
 	},
 }
@@ -130,13 +138,13 @@ func (p piece) shift() (sp piece) {
 		}
 	}
 }
-func (p piece) CanPlace(b *board.Board7x7, row, col int) bool {
+func (p piece) CanPlace(b *board.Board8x7, row, col int) bool {
 	return p.put(b, row, col, "", false)
 }
-func (p piece) Place(b *board.Board7x7, row, col int, text string) bool {
+func (p piece) Place(b *board.Board8x7, row, col int, text string) bool {
 	return p.put(b, row, col, text, true)
 }
-func (p piece) put(b *board.Board7x7, row int, col int, text string, doWrite bool) (suc bool) {
+func (p piece) put(b *board.Board8x7, row int, col int, text string, doWrite bool) (suc bool) {
 	// find first not empty block
 	dr, dc := 0, 0
 	for dr = 0; dr < n; dr++ {
