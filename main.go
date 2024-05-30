@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/fatih/color"
@@ -23,26 +22,14 @@ func main() {
 		day = os.Args[2]
 	}
 
-	b := board.Board
-	for i := range b {
-		for j := range b[i] {
-			switch {
-			case strings.EqualFold(b[i][j].Text, mon):
-				b[i][j].Flag = 1
-			case strings.EqualFold(b[i][j].Text, day):
-				b[i][j].Flag = 1
-			}
-		}
-	}
-
 	fmt.Printf("searching for %s %s\n", mon, day)
-	search(&b, 0)
-	fmt.Printf("found %d solutions\n", count)
+	search(board.NewBoard7x7(mon, day), 0)
+	fmt.Printf("found %d solutions\n", found)
 }
 
-var count = 0
+var found = 0
 var placed = make(map[int]bool)
-var cc = []func(string, ...interface{}) string{
+var colors = []func(string, ...interface{}) string{
 	color.RedString,
 	color.GreenString,
 	color.YellowString,
@@ -56,7 +43,7 @@ var cc = []func(string, ...interface{}) string{
 func search(b *board.Board7x7, pos int) {
 	if len(placed) == 8 {
 		b.Print()
-		count += 1
+		found += 1
 		return
 	}
 
@@ -78,10 +65,10 @@ func search(b *board.Board7x7, pos int) {
 		if !placed[i] {
 			for _, p := range piece.Pieces[i] {
 				if p.CanPlace(b, row, col) {
-					c := *b
+					e := b.Clone()
 					placed[i] = true
-					p.Place(&c, row, col, cc[i]("■"))
-					search(&c, pos+1)
+					p.Place(e, row, col, colors[i]("■"))
+					search(e, pos+1)
 					delete(placed, i)
 				}
 			}

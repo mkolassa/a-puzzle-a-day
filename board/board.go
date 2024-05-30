@@ -3,57 +3,83 @@ package board
 import (
 	"fmt"
 	"strings"
-
-	"github.com/fatih/color"
 )
 
-var Board = Board7x7{
-	{{"JAN", 0}, {"FEB", 0}, {"MAR", 0}, {"APR", 0}, {"MAY", 0}, {"JUN", 0}, {"", 1}},
-	{{"JUL", 0}, {"AUG", 0}, {"SEP", 0}, {"OCT", 0}, {"NOV", 0}, {"DEC", 0}, {"", 1}},
-	{{"1", 0}, {"2", 0}, {"3", 0}, {"4", 0}, {"5", 0}, {"6", 0}, {"7", 0}},
-	{{"8", 0}, {"9", 0}, {"10", 0}, {"11", 0}, {"12", 0}, {"13", 0}, {"14", 0}},
-	{{"15", 0}, {"16", 0}, {"17", 0}, {"18", 0}, {"19", 0}, {"20", 0}, {"21", 0}},
-	{{"22", 0}, {"23", 0}, {"24", 0}, {"25", 0}, {"26", 0}, {"27", 0}, {"28", 0}},
-	{{"29", 0}, {"30", 0}, {"31", 0}, {"", 1}, {"", 1}, {"", 1}, {"", 1}},
+type Board7x7 [7][7]struct {
+	text string
+	used bool
 }
 
-type (
-	cell struct {
-		Text string
-		Flag int
+func (b *Board7x7) reset() *Board7x7 {
+	const dat7x7 = `
+	JAN	|	FEB	|	MAR	|	APR	|	MAY	|	JUN	|	-
+	JUL	|	AUG	|	SEP	|	OCT	|	NOV	|	DEC	|	-
+	1	|	2	|	3	|	4	|	5	|	6	|	7
+	8	|	9	|	10	|	11	|	12	|	13 	|	14
+	15	|	16	|	17	|	18	|	19	|	20 	|	21
+	22	|	23	|	24	|	25	|	26	|	27 	|	28
+	29	|	30	|	31	|	-	|	-	|	- 	|	-
+`
+	for r, line := range strings.Split(strings.Trim(dat7x7, "\n"), "\n") {
+		for c, word := range strings.Split(line, "|") {
+			t := strings.TrimSpace(word)
+			b[r][c].text = t
+			b[r][c].used = t == "-"
+		}
 	}
-	Board7x7 [7][7]cell
-)
+	return b
+}
+func (b *Board7x7) setMonDay(mon string, day string) *Board7x7 {
+	for i := range b {
+		for j := range b[i] {
+			switch {
+			case strings.EqualFold(b[i][j].text, mon):
+				b[i][j].used = true
+			case strings.EqualFold(b[i][j].text, day):
+				b[i][j].used = true
+			}
+		}
+	}
+	return b
+}
 
+func (b *Board7x7) Clone() *Board7x7 {
+	c := *b
+	return &c
+}
 func (b *Board7x7) CanSet(r int, c int) (ok bool) {
 	if r < 0 || r > 6 || c < 0 || c > 6 {
 		return false
 	}
-	return b[r][c].Flag == 0
+	return b[r][c].used == false
 }
 func (b *Board7x7) Set(Text string, r int, c int) {
-	b[r][c].Text = Text
-	b[r][c].Flag = 1
+	b[r][c].text = Text
+	b[r][c].used = true
 }
-
 func (b *Board7x7) Print() {
 	for r := range b {
 		for c := range b[r] {
-			text := b[r][c].Text
+			text := b[r][c].text
 			tlen := len(text)
-			fmt.Fprint(color.Output, text)
-			// align with 3-width cells
-			if tlen == 3 {
-				// month needs no prefix to align with 3 width
-			} else if tlen == 2 {
-				// date needs only 1 suffix
+			fmt.Print(text)
+			switch {
+			case tlen == 3:
 				fmt.Print(" ")
-			} else {
-				// colored squares need 2 suffix
+			case tlen == 2:
+				fmt.Print(" ")
+			case c+1 < len(b[r]) && len(b[r][c+1].text) == 3:
+				fmt.Print(" ")
+			default:
 				fmt.Print("  ")
 			}
 		}
 		fmt.Println()
 	}
 	fmt.Println(strings.Repeat("-", 20))
+}
+
+func NewBoard7x7(mon string, day string) *Board7x7 {
+	var b Board7x7
+	return b.reset().setMonDay(mon, day)
 }
